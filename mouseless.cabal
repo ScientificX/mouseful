@@ -1,0 +1,64 @@
+cabal-version: 2.4
+name:          mouseless
+version:       0.1.0.0
+synopsis:      Keyboard-driven mouse control with grid overlay
+description:
+  Mouseless PC control: activate a labeled grid overlay, select targets by
+  key combos, and move the cursor with keyboard-only commands.
+category:      System
+license:       MIT
+author:        qdanov
+maintainer:    qdanov
+build-type:    Simple
+
+library
+  exposed-modules:
+      Mouseless.App
+      Mouseless.Core.Charset
+      Mouseless.Core.Commands
+      Mouseless.Core.Geometry
+      Mouseless.Core.Grid
+      Mouseless.Core.Input
+      Mouseless.Core.State
+      Mouseless.Platform.Class
+      Mouseless.Platform.Mock
+      Mouseless.Platform.MacOS
+  hs-source-dirs: src
+  default-language: Haskell2010
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wpartial-fields
+    -Wredundant-constraints
+  build-depends:
+      base >= 4.18 && < 5
+    , containers
+    , mtl
+    , stm
+    , text
+
+executable mouseless
+  main-is:          Main.hs
+  hs-source-dirs:   app
+  default-language: Haskell2010
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base
+    , containers
+    , mtl
+    , mouseless
+    , text
+
+test-suite mouseless-test
+  type:             exitcode-stdio-1.0
+  main-is:          Spec.hs
+  hs-source-dirs:   test
+  default-language: Haskell2010
+  build-depends:
+      base
+    , containers
+    , hspec
+    , mouseless
