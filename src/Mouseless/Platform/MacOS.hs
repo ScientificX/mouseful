@@ -3,61 +3,101 @@
 module Mouseless.Platform.MacOS
   ( macosEnv
   , macosAvailable
+  , macosShutdown
   ) where
 
-import Mouseless.Core.Commands (Effect (..), MoveDir (..))
-import Mouseless.Core.Geometry (Point (..), Screen (..))
+import Data.Text (unpack)
+import Mouseless.Core.Commands (Effect (..), MouseButton (..))
+import Mouseless.Core.Geometry (Point (..), Rect (..), Screen (..))
 import Mouseless.Core.Grid (LabeledCell (..))
 import Mouseless.Core.Input (Event (..), parseKeyChar)
 import Mouseless.Platform.Class (PlatformEnv (..))
+import qualified Mouseless.Platform.MacOS.FFI as Native
+import Mouseless.Platform.MacOS.FFI
+  ( MLEventType (..)
+  , MLGridCell (..)
+  , mouselessBeep
+  , mouselessClick
+  , mouselessCursorX
+  , mouselessCursorY
+  , mouselessHideOverlay
+  , mouselessInit
+  , mouselessScreenHeight
+  , mouselessScreenWidth
+  , mouselessShowOverlay
+  , mouselessWaitEvent
+  , mouselessWarpCursor
+  , mlEventKey
+  , mlEventType
+  )
 import System.Info (os)
 
--- | macOS platform layer (stdin demo stub).
+-- | Initialize the native macOS layer (overlay, global hotkey, cursor control).
 --
--- Production implementation will use:
---   * CGEventTap for global hotkeys while idle
---   * NSPanel overlay (transparent, screen-saver level) for the grid
---   * CGWarpMouseCursorPosition / CGEventPost for cursor control
---
+-- Activation key: F19 (rarely bound on most keyboards).
 -- Requires Accessibility permission in System Settings.
 macosEnv :: IO PlatformEnv
-macosEnv =
+macosEnv = do
+  mouselessInit
+  putStrLn "mouseless ready — press Cmd+7 to activate grid overlay (q to quit when focused)."
   pure
     PlatformEnv
-      { envGetScreen = pure (Screen 1920 1080)
-      , envGetCursor = pure (Point 0 0)
-      , envNextEvent = readStdinEvent
-      , envRunEffect = renderEffect
+      { envGetScreen = screenSize
+      , envGetCursor = cursorPos
+      , envNextEvent = waitInputEvent
+      , envRunEffect = runEffect
       }
+
+macosShutdown :: IO ()
+macosShutdown = Native.mouselessShutdown
 
 macosAvailable :: Bool
 macosAvailable = os == "darwin"
 
-readStdinEvent :: IO Event
-readStdinEvent = do
-  putStrLn "Key (a=activate grid, hjkl=move, space=click, esc=cancel, q=quit):"
-  line <- getLine
-  case lookupChar line >>= parseKeyChar of
-    Just ev -> pure ev
-    Nothing -> pure Quit
-  where
-    lookupChar [] = Nothing
-    lookupChar (c : _) = Just c
+screenSize :: IO Screen
+screenSize = do
+  w <- mouselessScreenWidth
+  h <- mouselessScreenHeight
+  pure (Screen w h)
 
-renderEffect :: Effect -> IO ()
-renderEffect = \case
-  ShowOverlay cells -> do
-    putStrLn "--- grid overlay ---"
-    mapM_ printCell cells
-  HideOverlay -> putStrLn "--- hide overlay ---"
-  WarpCursor (Point x y) -> putStrLn $ "warp cursor -> " ++ show x ++ "," ++ show y
-  NudgeCursor dir n -> putStrLn $ "nudge " ++ show dir ++ " " ++ show n
-  Click btn -> putStrLn $ "click " ++ show btn
-  Beep -> putStrLn "beep"
+cursorPos :: IO Point
+cursorPos = do
+  x <- mouselessCursorX
+  y <- mouselessCursorY
+  pure (Point x y)
 
-printCell :: LabeledCell -> IO ()
-printCell c =
-  putStrLn $
-    show (cellLabelText c)
-      ++ " @ "
-      ++ show (cellTarget c)
+waitInputEvent :: IO Event
+waitInputEvent = do
+  ev <- mouselessWaitEvent
+  case mlEventType ev of
+    MLActivation -> pure ActivationPressed
+    MLKey ->
+      case parseKeyChar (mlEventKey ev) of
+        Just mapped -> pure mapped
+        Nothing -> waitInputEvent
+    _ -> waitInputEvent
+
+runEffect :: Effect -> IO ()
+runEffect = \case
+  ShowOverlay cells -> mouselessShowOverlay (map toGridCell cells)
+  HideOverlay -> mouselessHideOverlay
+  WarpCursor (Point x y) -> mouselessWarpCursor x y
+  NudgeCursor _ _ -> pure ()
+  Click btn -> mouselessClick (buttonCode btn)
+  Beep -> mouselessBeep
+
+buttonCode :: MouseButton -> Int
+buttonCode = \case
+  LeftButton -> 0
+  RightButton -> 1
+  MiddleButton -> 2
+
+toGridCell :: LabeledCell -> MLGridCell
+toGridCell cell =
+  MLGridCell
+    { mlCellX = rx (cellRect cell)
+    , mlCellY = ry (cellRect cell)
+    , mlCellW = rw (cellRect cell)
+    , mlCellH = rh (cellRect cell)
+    , mlCellLabel = unpack (cellLabelText cell)
+    }

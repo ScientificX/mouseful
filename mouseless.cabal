@@ -1,4 +1,4 @@
-cabal-version: 2.4
+cabal-version: 3.0
 name:          mouseless
 version:       0.1.0.0
 synopsis:      Keyboard-driven mouse control with grid overlay
@@ -23,6 +23,8 @@ library
       Mouseless.Platform.Class
       Mouseless.Platform.Mock
       Mouseless.Platform.MacOS
+  other-modules:
+      Mouseless.Platform.MacOS.FFI
   hs-source-dirs: src
   default-language: Haskell2010
   ghc-options:
@@ -39,6 +41,14 @@ library
     , mtl
     , stm
     , text
+  if os(darwin)
+    include-dirs: cbits
+    cxx-sources:  cbits/mouseless_macos.m
+    ghc-options:
+      -optl-Wl,-framework,Cocoa
+      -optl-Wl,-framework,Carbon
+      -optl-Wl,-framework,CoreGraphics
+      -optl-Wl,-framework,ApplicationServices
 
 executable mouseless
   main-is:          Main.hs
@@ -51,10 +61,17 @@ executable mouseless
     , mtl
     , mouseless
     , text
+  if os(darwin)
+    ghc-options:
+      -optl-Wl,-framework,Cocoa
+      -optl-Wl,-framework,Carbon
+      -optl-Wl,-framework,CoreGraphics
+      -optl-Wl,-framework,ApplicationServices
 
 test-suite mouseless-test
   type:             exitcode-stdio-1.0
   main-is:          Spec.hs
+  other-modules:    Harness
   hs-source-dirs:   test
   default-language: Haskell2010
   build-depends:
@@ -62,3 +79,11 @@ test-suite mouseless-test
     , containers
     , hspec
     , mouseless
+    , mtl
+    , text
+  if os(darwin)
+    ghc-options:
+      -optl-Wl,-framework,Cocoa
+      -optl-Wl,-framework,Carbon
+      -optl-Wl,-framework,CoreGraphics
+      -optl-Wl,-framework,ApplicationServices

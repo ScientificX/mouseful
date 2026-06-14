@@ -9,7 +9,7 @@ module Mouseless.Core.State
   ) where
 
 import Data.List (isPrefixOf)
-import Mouseless.Core.Charset (Key)
+import Mouseless.Core.Charset (Key (..))
 import Mouseless.Core.Commands
   ( Effect (..)
   , MouseButton (..)
@@ -138,7 +138,15 @@ handleGrid cfg st ev =
             Incomplete typed' ->
               (st {stMode = overlay {typedKeys = typed'}}, [])
             Resolved cell -> selectCell cfg st cell
-    (GridOverlay {}, MoveKey dir) -> nudge cfg st dir
+    (overlay@GridOverlay {overlayCells = cells, typedKeys = typed}, MoveKey dir) ->
+      case dirToKey dir of
+        Just key ->
+          case resolveSelection cells (typed ++ [key]) of
+            NoMatch -> nudge cfg st dir
+            Incomplete typed' ->
+              (st {stMode = overlay {typedKeys = typed'}}, [])
+            Resolved cell -> selectCell cfg st cell
+        Nothing -> nudge cfg st dir
     (GridOverlay {}, Confirm) ->
       case stMode st of
         GridOverlay {overlayCells = cells, typedKeys = typed} ->
@@ -235,6 +243,12 @@ nudgeWith :: Int -> AppState -> MoveDir -> (AppState, [Effect])
 nudgeWith step st dir =
   let p' = clampPoint (stScreen st) (applyDir step (stCursor st) dir)
    in (st {stCursor = p'}, [WarpCursor p'])
+
+dirToKey :: MoveDir -> Maybe Key
+dirToKey MoveLeft = Just KeyH
+dirToKey MoveDown = Just KeyJ
+dirToKey MoveUp = Just KeyK
+dirToKey MoveRight = Just KeyL
 
 screenRect :: Screen -> Rect
 screenRect (Screen w h) = Rect 0 0 w h

@@ -32,9 +32,10 @@ keySequences n = take n (concat (map (\len -> sequences len defaultKeys) [1 ..])
       [ k : rest
       | k <- ks
       , rest <- sequences (len - 1) ks
+      , k `notElem`   rest
       ]
 
 keysToText :: [Key] -> Text
 keysToText = T.pack . map keyChar
   where
-    keyChar k = toLower (head (show k))
+    keyChar k = toLower (last (show k))
