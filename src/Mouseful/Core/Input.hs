@@ -1,4 +1,4 @@
-module Mouseless.Core.Input
+module Mouseful.Core.Input
   ( Event (..)
   , charToKey
   , parseKeyChar
@@ -6,8 +6,8 @@ module Mouseless.Core.Input
   ) where
 
 import Data.Char (toLower)
-import Mouseless.Core.Charset (Key (..))
-import Mouseless.Core.Commands (MoveDir (..))
+import Mouseful.Core.Charset (Key (..))
+import Mouseful.Core.Commands (MoveDir (..))
 
 data Event
   = ActivationPressed

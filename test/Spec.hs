@@ -2,14 +2,14 @@ module Main (main) where
 
 import Data.List (isPrefixOf, sort)
 import qualified Data.Text as T
-import Mouseless.Core.Charset
+import Mouseful.Core.Charset
   ( Key (..)
   , defaultKeys
   , keySequences
   , keysToText
   )
-import Mouseless.Core.Commands (Effect (..), MouseButton (..), MoveDir (..))
-import Mouseless.Core.Geometry
+import Mouseful.Core.Commands (Effect (..), MouseButton (..), MoveDir (..))
+import Mouseful.Core.Geometry
   ( Point (..)
   , Rect (..)
   , Screen (..)
@@ -19,7 +19,7 @@ import Mouseless.Core.Geometry
   , inset
   , rectFromPoints
   )
-import Mouseless.Core.Grid
+import Mouseful.Core.Grid
   ( GridConfig (..)
   , GridLevel (..)
   , LabeledCell (..)
@@ -31,13 +31,13 @@ import Mouseless.Core.Grid
   , refineRegion
   , subdivide
   )
-import Mouseless.Core.Input
+import Mouseful.Core.Input
   ( Event (..)
   , charToKey
   , directionFromChar
   , parseKeyChar
   )
-import Mouseless.Core.State
+import Mouseful.Core.State
   ( AppState (..)
   , Config (..)
   , Mode (..)
@@ -51,7 +51,7 @@ import Mouseless.Core.State
 import Harness
   ( simulate
   , simulate_
-  , runMouselessSim
+  , runMousefulSim
   )
 import Test.Hspec
 
@@ -60,11 +60,11 @@ main = hspec spec
 
 spec :: Spec
 spec = do
-  describe "Mouseless.Core.Geometry" geometrySpec
-  describe "Mouseless.Core.Charset" charsetSpec
-  describe "Mouseless.Core.Grid" gridSpec
-  describe "Mouseless.Core.Input" inputSpec
-  describe "Mouseless.Core.State" stateSpec
+  describe "Mouseful.Core.Geometry" geometrySpec
+  describe "Mouseful.Core.Charset" charsetSpec
+  describe "Mouseful.Core.Grid" gridSpec
+  describe "Mouseful.Core.Input" inputSpec
+  describe "Mouseful.Core.State" stateSpec
   describe "Cmd+7 activation simulation" activationSimSpec
 
 --------------------------------------------------------------------------------
@@ -737,7 +737,7 @@ activationSimSpec = do
   describe "simulating Cmd+7 (ActivationPressed)" $ do
     it "shows coarse grid overlay with 40 cells on activation" $ do
       let (fx, st) =
-            runMouselessSim
+            runMousefulSim
               (Screen 1920 1080, Point 960 540)
               defaultConfig
               (simulate_ defaultConfig [ActivationPressed])
@@ -755,7 +755,7 @@ activationSimSpec = do
 
     it "typing 'a' in coarse grid selects cell 'a' and opens fine grid" $ do
       let (fx, st) =
-            runMouselessSim
+            runMousefulSim
               (Screen 1920 1080, Point 960 540)
               defaultConfig
               (simulate_ defaultConfig
@@ -769,7 +769,7 @@ activationSimSpec = do
 
     it "typing non-label char '1' in coarse grid should beep" $ do
       let (fx, st) =
-            runMouselessSim
+            runMousefulSim
               (Screen 1920 1080, Point 960 540)
               defaultConfig
               (simulate_ defaultConfig
@@ -780,7 +780,7 @@ activationSimSpec = do
 
     it "Cancel closes the overlay" $ do
       let (fx, st) =
-            runMouselessSim
+            runMousefulSim
               (Screen 1920 1080, Point 960 540)
               defaultConfig
               (simulate_ defaultConfig
@@ -792,7 +792,7 @@ activationSimSpec = do
 
     it "pressing 'k' (via MoveKey Up) in grid resolves cell 'k'" $ do
       let (fx, st) =
-            runMouselessSim
+            runMousefulSim
               (Screen 1920 1080, Point 960 540)
               defaultConfig
               (simulate_ defaultConfig
@@ -806,7 +806,7 @@ activationSimSpec = do
 
     it "full flow: activate, type 'as', select fine cell 'a'" $ do
       let (fx, st) =
-            runMouselessSim
+            runMousefulSim
               (Screen 800 600, Point 400 300)
               defaultConfig
               (simulate_ defaultConfig

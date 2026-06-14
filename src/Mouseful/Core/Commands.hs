@@ -1,11 +1,11 @@
-module Mouseless.Core.Commands
+module Mouseful.Core.Commands
   ( MouseButton (..)
   , MoveDir (..)
   , Effect (..)
   ) where
 
-import Mouseless.Core.Geometry (Point (..))
-import Mouseless.Core.Grid (LabeledCell)
+import Mouseful.Core.Geometry (Point (..))
+import Mouseful.Core.Grid (LabeledCell)
 
 data MouseButton = LeftButton | RightButton | MiddleButton
   deriving (Eq, Show)

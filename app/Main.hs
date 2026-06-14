@@ -1,10 +1,10 @@
 module Main where
 
 import Control.Exception (bracket)
-import Mouseless.App (runMouseless)
-import Mouseless.Core.State (defaultConfig)
-import Mouseless.Platform.MacOS (macosAvailable, macosEnv, macosShutdown)
-import Mouseless.Platform.Mock (mockEnv)
+import Mouseful.App (runMouseful)
+import Mouseful.Core.State (defaultConfig)
+import Mouseful.Platform.MacOS (macosAvailable, macosEnv, macosShutdown)
+import Mouseful.Platform.Mock (mockEnv)
 import System.Environment (getArgs)
 
 main :: IO ()
@@ -13,10 +13,10 @@ main = do
   case args of
     ("--mock" : _) -> do
       (env, _) <- mockEnv
-      runMouseless env defaultConfig
+      runMouseful env defaultConfig
     _ ->
       if macosAvailable
         then
           bracket macosEnv (\_ -> macosShutdown) $ \env ->
-            runMouseless env defaultConfig
-        else fail "mouseless currently targets macOS"
+            runMouseful env defaultConfig
+        else fail "mouseful currently targets macOS"

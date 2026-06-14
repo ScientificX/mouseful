@@ -1,4 +1,4 @@
-module Mouseless.Core.Charset
+module Mouseful.Core.Charset
   ( Key (..)
   , defaultKeys
   , keySequences

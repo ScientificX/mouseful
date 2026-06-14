@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Mouseless.Platform.Class
+module Mouseful.Platform.Class
   ( Platform (..)
   , PlatformEnv (..)
   , PlatformM
@@ -11,10 +11,10 @@ module Mouseless.Platform.Class
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
-import Mouseless.Core.Commands (Effect (..))
-import Mouseless.Core.Geometry (Point, Screen)
-import Mouseless.Core.Grid (LabeledCell)
-import Mouseless.Core.Input (Event)
+import Mouseful.Core.Commands (Effect (..))
+import Mouseful.Core.Geometry (Point, Screen)
+import Mouseful.Core.Grid (LabeledCell)
+import Mouseful.Core.Input (Event)
 
 class Monad m => Platform m where
   getScreen :: m Screen

@@ -1,4 +1,4 @@
-module Mouseless.Platform.Mock
+module Mouseful.Platform.Mock
   ( mockEnv
   , mockDemoEvents
   ) where
@@ -10,10 +10,10 @@ import Control.Concurrent.STM
   , newTVarIO
   , readTVarIO
   )
-import Mouseless.Core.Commands (Effect (..))
-import Mouseless.Core.Geometry (Point (..), Screen (..))
-import Mouseless.Core.Input (Event (..))
-import Mouseless.Platform.Class (PlatformEnv (..))
+import Mouseful.Core.Commands (Effect (..))
+import Mouseful.Core.Geometry (Point (..), Screen (..))
+import Mouseful.Core.Input (Event (..))
+import Mouseful.Platform.Class (PlatformEnv (..))
 
 data MockState = MockState
   { mockScreen :: !Screen

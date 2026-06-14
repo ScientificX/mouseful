@@ -1,4 +1,4 @@
-module Mouseless.Core.State
+module Mouseful.Core.State
   ( MoveStyle (..)
   , Mode (..)
   , AppState (..)
@@ -9,20 +9,20 @@ module Mouseless.Core.State
   ) where
 
 import Data.List (isPrefixOf)
-import Mouseless.Core.Charset (Key (..))
-import Mouseless.Core.Commands
+import Mouseful.Core.Charset (Key (..))
+import Mouseful.Core.Commands
   ( Effect (..)
   , MouseButton (..)
   , MoveDir (..)
   )
-import Mouseless.Core.Geometry
+import Mouseful.Core.Geometry
   ( Point (..)
   , Rect (..)
   , Screen (..)
   , clampPoint
   , contains
   )
-import Mouseless.Core.Grid
+import Mouseful.Core.Grid
   ( GridConfig
   , GridLevel (..)
   , LabeledCell (..)
@@ -30,7 +30,7 @@ import Mouseless.Core.Grid
   , refineRegion
   , subdivide
   )
-import Mouseless.Core.Input (Event (..), charToKey)
+import Mouseful.Core.Input (Event (..), charToKey)
 
 data MoveStyle = FreeRange | GridStep
   deriving (Eq, Show)

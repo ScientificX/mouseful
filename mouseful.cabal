@@ -1,9 +1,9 @@
 cabal-version: 3.0
-name:          mouseless
+name:          mouseful
 version:       0.1.0.0
 synopsis:      Keyboard-driven mouse control with grid overlay
 description:
-  Mouseless PC control: activate a labeled grid overlay, select targets by
+  Mouseful PC control: activate a labeled grid overlay, select targets by
   key combos, and move the cursor with keyboard-only commands.
 category:      System
 license:       MIT
@@ -13,18 +13,18 @@ build-type:    Simple
 
 library
   exposed-modules:
-      Mouseless.App
-      Mouseless.Core.Charset
-      Mouseless.Core.Commands
-      Mouseless.Core.Geometry
-      Mouseless.Core.Grid
-      Mouseless.Core.Input
-      Mouseless.Core.State
-      Mouseless.Platform.Class
-      Mouseless.Platform.Mock
-      Mouseless.Platform.MacOS
+      Mouseful.App
+      Mouseful.Core.Charset
+      Mouseful.Core.Commands
+      Mouseful.Core.Geometry
+      Mouseful.Core.Grid
+      Mouseful.Core.Input
+      Mouseful.Core.State
+      Mouseful.Platform.Class
+      Mouseful.Platform.Mock
+      Mouseful.Platform.MacOS
   other-modules:
-      Mouseless.Platform.MacOS.FFI
+      Mouseful.Platform.MacOS.FFI
   hs-source-dirs: src
   default-language: Haskell2010
   ghc-options:
@@ -43,14 +43,14 @@ library
     , text
   if os(darwin)
     include-dirs: cbits
-    cxx-sources:  cbits/mouseless_macos.m
+    cxx-sources:  cbits/mouseful_macos.m
     ghc-options:
       -optl-Wl,-framework,Cocoa
       -optl-Wl,-framework,Carbon
       -optl-Wl,-framework,CoreGraphics
       -optl-Wl,-framework,ApplicationServices
 
-executable mouseless
+executable mouseful
   main-is:          Main.hs
   hs-source-dirs:   app
   default-language: Haskell2010
@@ -59,7 +59,7 @@ executable mouseless
       base
     , containers
     , mtl
-    , mouseless
+    , mouseful
     , text
   if os(darwin)
     ghc-options:
@@ -68,7 +68,7 @@ executable mouseless
       -optl-Wl,-framework,CoreGraphics
       -optl-Wl,-framework,ApplicationServices
 
-test-suite mouseless-test
+test-suite mouseful-test
   type:             exitcode-stdio-1.0
   main-is:          Spec.hs
   other-modules:    Harness
@@ -78,7 +78,7 @@ test-suite mouseless-test
       base
     , containers
     , hspec
-    , mouseless
+    , mouseful
     , mtl
     , text
   if os(darwin)

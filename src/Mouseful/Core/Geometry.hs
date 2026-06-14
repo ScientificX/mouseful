@@ -1,4 +1,4 @@
-module Mouseless.Core.Geometry
+module Mouseful.Core.Geometry
   ( Point (..)
   , Rect (..)
   , Screen (..)

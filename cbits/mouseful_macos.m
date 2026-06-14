@@ -1,7 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
 #import <ApplicationServices/ApplicationServices.h>
-#import "mouseless_macos.h"
+#import "mouseful_macos.h"
 
 #include <pthread.h>
 #include <string.h>
@@ -84,10 +84,10 @@ static char keycode_to_char(CGKeyCode keycode) {
     return 0;
 }
 
-@interface MouselessOverlayView : NSView
+@interface MousefulOverlayView : NSView
 @end
 
-@implementation MouselessOverlayView
+@implementation MousefulOverlayView
 
 - (BOOL)isFlipped {
     return YES;
@@ -244,7 +244,7 @@ static void setup_overlay(void) {
                                      NSWindowCollectionBehaviorIgnoresCycle];
         [panel setHidesOnDeactivate:NO];
 
-        MouselessOverlayView *view = [[MouselessOverlayView alloc] initWithFrame:frame];
+        MousefulOverlayView *view = [[MousefulOverlayView alloc] initWithFrame:frame];
         [panel setContentView:view];
 
         g_overlayPanel = panel;
@@ -252,7 +252,7 @@ static void setup_overlay(void) {
     }
 }
 
-int mouseless_init(void) {
+int mouseful_init(void) {
     @autoreleasepool {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
@@ -276,8 +276,8 @@ int mouseless_init(void) {
     }
 }
 
-void mouseless_shutdown(void) {
-    mouseless_hide_overlay();
+void mouseful_shutdown(void) {
+    mouseful_hide_overlay();
 
     if (g_tapRunLoop) {
         CFRunLoopStop(g_tapRunLoop);
@@ -302,41 +302,41 @@ void mouseless_shutdown(void) {
     pthread_mutex_unlock(&g_overlayMutex);
 }
 
-const char *mouseless_last_error(void) {
+const char *mouseful_last_error(void) {
     return g_last_error;
 }
 
-int32_t mouseless_screen_width(void) {
+int32_t mouseful_screen_width(void) {
     @autoreleasepool {
         return (int32_t)[NSScreen mainScreen].frame.size.width;
     }
 }
 
-int32_t mouseless_screen_height(void) {
+int32_t mouseful_screen_height(void) {
     @autoreleasepool {
         return (int32_t)[NSScreen mainScreen].frame.size.height;
     }
 }
 
-int32_t mouseless_cursor_x(void) {
+int32_t mouseful_cursor_x(void) {
     CGEventRef ev = CGEventCreate(NULL);
     CGPoint p = CGEventGetLocation(ev);
     CFRelease(ev);
     return (int32_t)p.x;
 }
 
-int32_t mouseless_cursor_y(void) {
+int32_t mouseful_cursor_y(void) {
     CGEventRef ev = CGEventCreate(NULL);
     CGPoint p = CGEventGetLocation(ev);
     CFRelease(ev);
     return (int32_t)p.y;
 }
 
-void mouseless_warp_cursor(int32_t x, int32_t y) {
+void mouseful_warp_cursor(int32_t x, int32_t y) {
     CGWarpMouseCursorPosition(CGPointMake((CGFloat)x, (CGFloat)y));
 }
 
-void mouseless_click(int32_t button) {
+void mouseful_click(int32_t button) {
     CGMouseButton btn = kCGMouseButtonLeft;
     CGEventType down = kCGEventLeftMouseDown;
     CGEventType up = kCGEventLeftMouseUp;
@@ -351,7 +351,7 @@ void mouseless_click(int32_t button) {
         up = kCGEventOtherMouseUp;
     }
 
-    CGPoint pos = CGPointMake(mouseless_cursor_x(), mouseless_cursor_y());
+    CGPoint pos = CGPointMake(mouseful_cursor_x(), mouseful_cursor_y());
     CGEventRef downEvent = CGEventCreateMouseEvent(NULL, down, pos, btn);
     CGEventRef upEvent = CGEventCreateMouseEvent(NULL, up, pos, btn);
     CGEventPost(kCGHIDEventTap, downEvent);
@@ -360,11 +360,11 @@ void mouseless_click(int32_t button) {
     CFRelease(upEvent);
 }
 
-void mouseless_beep(void) {
+void mouseful_beep(void) {
     NSBeep();
 }
 
-void mouseless_show_overlay(const MLGridCell *cells, size_t count) {
+void mouseful_show_overlay(const MLGridCell *cells, size_t count) {
     @autoreleasepool {
         pthread_mutex_lock(&g_overlayMutex);
         free(g_overlayCells);
@@ -382,14 +382,14 @@ void mouseless_show_overlay(const MLGridCell *cells, size_t count) {
         NSScreen *screen = [NSScreen mainScreen];
         NSRect frame = [screen frame];
         [(NSPanel *)g_overlayPanel setFrame:frame display:YES];
-        [(MouselessOverlayView *)g_overlayView setFrame:frame];
-        [(MouselessOverlayView *)g_overlayView setNeedsDisplay:YES];
+        [(MousefulOverlayView *)g_overlayView setFrame:frame];
+        [(MousefulOverlayView *)g_overlayView setNeedsDisplay:YES];
         [(NSPanel *)g_overlayPanel orderFrontRegardless];
         pump_app_events();
     }
 }
 
-void mouseless_hide_overlay(void) {
+void mouseful_hide_overlay(void) {
     @autoreleasepool {
         g_overlayVisible = NO;
         if (g_overlayPanel) {
@@ -404,7 +404,7 @@ void mouseless_hide_overlay(void) {
     }
 }
 
-void mouseless_wait_event(MLEvent *out) {
+void mouseful_wait_event(MLEvent *out) {
     QueuedEvent queued;
     dequeue_event(&queued);
     pump_app_events();

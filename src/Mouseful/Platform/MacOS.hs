@@ -1,32 +1,32 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Mouseless.Platform.MacOS
+module Mouseful.Platform.MacOS
   ( macosEnv
   , macosAvailable
   , macosShutdown
   ) where
 
 import Data.Text (unpack)
-import Mouseless.Core.Commands (Effect (..), MouseButton (..))
-import Mouseless.Core.Geometry (Point (..), Rect (..), Screen (..))
-import Mouseless.Core.Grid (LabeledCell (..))
-import Mouseless.Core.Input (Event (..), parseKeyChar)
-import Mouseless.Platform.Class (PlatformEnv (..))
-import qualified Mouseless.Platform.MacOS.FFI as Native
-import Mouseless.Platform.MacOS.FFI
+import Mouseful.Core.Commands (Effect (..), MouseButton (..))
+import Mouseful.Core.Geometry (Point (..), Rect (..), Screen (..))
+import Mouseful.Core.Grid (LabeledCell (..))
+import Mouseful.Core.Input (Event (..), parseKeyChar)
+import Mouseful.Platform.Class (PlatformEnv (..))
+import qualified Mouseful.Platform.MacOS.FFI as Native
+import Mouseful.Platform.MacOS.FFI
   ( MLEventType (..)
   , MLGridCell (..)
-  , mouselessBeep
-  , mouselessClick
-  , mouselessCursorX
-  , mouselessCursorY
-  , mouselessHideOverlay
-  , mouselessInit
-  , mouselessScreenHeight
-  , mouselessScreenWidth
-  , mouselessShowOverlay
-  , mouselessWaitEvent
-  , mouselessWarpCursor
+  , mousefulBeep
+  , mousefulClick
+  , mousefulCursorX
+  , mousefulCursorY
+  , mousefulHideOverlay
+  , mousefulInit
+  , mousefulScreenHeight
+  , mousefulScreenWidth
+  , mousefulShowOverlay
+  , mousefulWaitEvent
+  , mousefulWarpCursor
   , mlEventKey
   , mlEventType
   )
@@ -38,8 +38,8 @@ import System.Info (os)
 -- Requires Accessibility permission in System Settings.
 macosEnv :: IO PlatformEnv
 macosEnv = do
-  mouselessInit
-  putStrLn "mouseless ready — press Cmd+7 to activate grid overlay (q to quit when focused)."
+  mousefulInit
+  putStrLn "mouseful ready — press Cmd+7 to activate grid overlay (q to quit when focused)."
   pure
     PlatformEnv
       { envGetScreen = screenSize
@@ -49,26 +49,26 @@ macosEnv = do
       }
 
 macosShutdown :: IO ()
-macosShutdown = Native.mouselessShutdown
+macosShutdown = Native.mousefulShutdown
 
 macosAvailable :: Bool
 macosAvailable = os == "darwin"
 
 screenSize :: IO Screen
 screenSize = do
-  w <- mouselessScreenWidth
-  h <- mouselessScreenHeight
+  w <- mousefulScreenWidth
+  h <- mousefulScreenHeight
   pure (Screen w h)
 
 cursorPos :: IO Point
 cursorPos = do
-  x <- mouselessCursorX
-  y <- mouselessCursorY
+  x <- mousefulCursorX
+  y <- mousefulCursorY
   pure (Point x y)
 
 waitInputEvent :: IO Event
 waitInputEvent = do
-  ev <- mouselessWaitEvent
+  ev <- mousefulWaitEvent
   case mlEventType ev of
     MLActivation -> pure ActivationPressed
     MLKey ->
@@ -79,12 +79,12 @@ waitInputEvent = do
 
 runEffect :: Effect -> IO ()
 runEffect = \case
-  ShowOverlay cells -> mouselessShowOverlay (map toGridCell cells)
-  HideOverlay -> mouselessHideOverlay
-  WarpCursor (Point x y) -> mouselessWarpCursor x y
+  ShowOverlay cells -> mousefulShowOverlay (map toGridCell cells)
+  HideOverlay -> mousefulHideOverlay
+  WarpCursor (Point x y) -> mousefulWarpCursor x y
   NudgeCursor _ _ -> pure ()
-  Click btn -> mouselessClick (buttonCode btn)
-  Beep -> mouselessBeep
+  Click btn -> mousefulClick (buttonCode btn)
+  Beep -> mousefulBeep
 
 buttonCode :: MouseButton -> Int
 buttonCode = \case

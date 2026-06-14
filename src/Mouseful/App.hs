@@ -1,9 +1,9 @@
-module Mouseless.App (runMouseless) where
+module Mouseful.App (runMouseful) where
 
 import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Mouseless.Core.Input (Event (..))
-import Mouseless.Core.State
+import Mouseful.Core.Input (Event (..))
+import Mouseful.Core.State
   ( AppState
   , Config
   , Mode (..)
@@ -11,10 +11,10 @@ import Mouseless.Core.State
   , step
   , stMode
   )
-import Mouseless.Platform.Class (Platform (..), PlatformEnv, runPlatform)
+import Mouseful.Platform.Class (Platform (..), PlatformEnv, runPlatform)
 
-runMouseless :: PlatformEnv -> Config -> IO ()
-runMouseless env cfg = runPlatform env $ do
+runMouseful :: PlatformEnv -> Config -> IO ()
+runMouseful env cfg = runPlatform env $ do
   screen <- getScreen
   cursor <- getCursor
   loop cfg (initialState screen cursor)

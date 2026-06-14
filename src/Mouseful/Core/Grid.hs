@@ -1,4 +1,4 @@
-module Mouseless.Core.Grid
+module Mouseful.Core.Grid
   ( GridLevel (..)
   , LabeledCell (..)
   , GridConfig (..)
@@ -8,8 +8,8 @@ module Mouseless.Core.Grid
   ) where
 
 import Data.Text (Text)
-import Mouseless.Core.Charset (Key, keySequences, keysToText)
-import Mouseless.Core.Geometry (Point (..), Rect (..), center)
+import Mouseful.Core.Charset (Key, keySequences, keysToText)
+import Mouseful.Core.Geometry (Point (..), Rect (..), center)
 
 data GridLevel = Coarse | Fine
   deriving (Eq, Show)

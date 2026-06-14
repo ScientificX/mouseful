@@ -1,7 +1,7 @@
 module Harness
   ( simulate
   , simulate_
-  , runMouselessSim
+  , runMousefulSim
   , SimulationState (..)
   , simEffects
   , simMode
@@ -13,10 +13,10 @@ import Control.Monad.State.Strict
   , modify'
   , runState
   )
-import Mouseless.Core.Commands (Effect)
-import Mouseless.Core.Geometry (Point, Screen)
-import Mouseless.Core.Input (Event)
-import Mouseless.Core.State
+import Mouseful.Core.Commands (Effect)
+import Mouseful.Core.Geometry (Point, Screen)
+import Mouseful.Core.Input (Event)
+import Mouseful.Core.State
   ( AppState
   , Config
   , Mode (..)
@@ -43,12 +43,12 @@ simulate cfg ev = do
 simulate_ :: Config -> [Event] -> State SimulationState ()
 simulate_ cfg = mapM_ (simulate cfg)
 
-runMouselessSim
+runMousefulSim
   :: (Screen, Point)
   -> Config
   -> State SimulationState ()
   -> ([Effect], AppState)
-runMouselessSim (screen, cursor) cfg m =
+runMousefulSim (screen, cursor) cfg m =
   let initSt = SimulationState
         { simAppState = initialState screen cursor
         , simEffects = []
