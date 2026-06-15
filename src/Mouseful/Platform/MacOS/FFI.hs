@@ -25,7 +25,7 @@ import Foreign (Ptr, Storable (..), alloca, allocaArray, nullPtr, peek, plusPtr)
 import Foreign.C.String (CString, peekCString)
 import Foreign.C.Types (CChar, CInt (..), CSize (..))
 
-data MLEventType = MLNone | MLActivation | MLKey
+data MLEventType = MLNone | MLActivation | MLKey | MLFreeRange
   deriving (Eq, Show)
 
 data MLEvent = MLEvent
@@ -138,6 +138,7 @@ mousefulWaitEvent = alloca $ \ptr -> do
   where
     decodeType 1 = MLActivation
     decodeType 2 = MLKey
+    decodeType 3 = MLFreeRange
     decodeType _ = MLNone
 
 pokeGridCell :: Ptr CMLGridCell -> Int -> MLGridCell -> IO ()

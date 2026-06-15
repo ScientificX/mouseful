@@ -11,7 +11,8 @@ extern "C" {
 typedef enum {
   ML_EVT_NONE = 0,
   ML_EVT_ACTIVATION = 1,
-  ML_EVT_KEY = 2
+  ML_EVT_KEY = 2,
+  ML_EVT_FREE_RANGE = 3
 } MLEventType;
 
 typedef struct {

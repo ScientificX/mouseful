@@ -30,7 +30,7 @@ import Mouseful.Core.Grid
   , refineRegion
   , subdivide
   )
-import Mouseful.Core.Input (Event (..), charToKey)
+import Mouseful.Core.Input (Event (..), KeyBindings, charToKey, defaultKeyBindings)
 
 data MoveStyle = FreeRange | GridStep
   deriving (Eq, Show)
@@ -61,6 +61,7 @@ data Config = Config
   , cfgFreeStep :: !Int
   , cfgGridStep :: !Int
   , cfgAutoFineGrid :: !Bool
+  , cfgBindings :: !KeyBindings
   }
   deriving (Eq, Show)
 
@@ -71,6 +72,7 @@ defaultConfig =
     , cfgFreeStep = 8
     , cfgGridStep = 24
     , cfgAutoFineGrid = True
+    , cfgBindings = defaultKeyBindings
     }
 
 initialState :: Screen -> Point -> AppState
@@ -87,8 +89,13 @@ step cfg st ev =
     (Idle, ActivationPressed) -> enterCoarseGrid cfg st
     (Idle, MoveKey dir) -> nudge cfg st dir
     (Idle, ToggleMoveMode) -> enterCursorControl st FreeRange
+    (Idle, ClickLeft) -> (st, [Click LeftButton])
+    (Idle, ClickRight) -> (st, [Click RightButton])
     (Idle, Quit) -> (st, [])
     (GridOverlay {}, Cancel) -> exitOverlay st
+    (GridOverlay {}, ToggleMoveMode) -> (st, [Beep])
+    (GridOverlay {}, ClickLeft) -> (st, [Click LeftButton])
+    (GridOverlay {}, ClickRight) -> (st, [Click RightButton])
     (GridOverlay {}, ev') -> handleGrid cfg st ev'
     (CursorControl {}, Cancel) -> (st {stMode = Idle}, [HideOverlay])
     (CursorControl {}, ToggleMoveMode) -> toggleMoveStyle st

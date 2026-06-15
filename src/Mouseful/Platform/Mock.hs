@@ -12,7 +12,7 @@ import Control.Concurrent.STM
   )
 import Mouseful.Core.Commands (Effect (..))
 import Mouseful.Core.Geometry (Point (..), Screen (..))
-import Mouseful.Core.Input (Event (..))
+import Mouseful.Core.Input (Event (..), defaultKeyBindings)
 import Mouseful.Platform.Class (PlatformEnv (..))
 
 data MockState = MockState
@@ -39,6 +39,7 @@ mockEnv = do
           , envGetCursor = mockGetCursor ref
           , envNextEvent = mockNextEvent ref
           , envRunEffect = mockRunEffect ref
+          , envBindings = defaultKeyBindings
           }
   pure (env, ref)
 

@@ -10,7 +10,7 @@ import Data.Text (unpack)
 import Mouseful.Core.Commands (Effect (..), MouseButton (..))
 import Mouseful.Core.Geometry (Point (..), Rect (..), Screen (..))
 import Mouseful.Core.Grid (LabeledCell (..))
-import Mouseful.Core.Input (Event (..), parseKeyChar)
+import Mouseful.Core.Input (Event (..), KeyBindings, defaultKeyBindings, parseKeyChar)
 import Mouseful.Platform.Class (PlatformEnv (..))
 import qualified Mouseful.Platform.MacOS.FFI as Native
 import Mouseful.Platform.MacOS.FFI
@@ -44,8 +44,9 @@ macosEnv = do
     PlatformEnv
       { envGetScreen = screenSize
       , envGetCursor = cursorPos
-      , envNextEvent = waitInputEvent
+      , envNextEvent = waitInputEvent defaultKeyBindings
       , envRunEffect = runEffect
+      , envBindings = defaultKeyBindings
       }
 
 macosShutdown :: IO ()
@@ -66,16 +67,17 @@ cursorPos = do
   y <- mousefulCursorY
   pure (Point x y)
 
-waitInputEvent :: IO Event
-waitInputEvent = do
+waitInputEvent :: KeyBindings -> IO Event
+waitInputEvent kb = do
   ev <- mousefulWaitEvent
   case mlEventType ev of
     MLActivation -> pure ActivationPressed
+    MLFreeRange -> pure ToggleMoveMode
     MLKey ->
-      case parseKeyChar (mlEventKey ev) of
+      case parseKeyChar kb (mlEventKey ev) of
         Just mapped -> pure mapped
-        Nothing -> waitInputEvent
-    _ -> waitInputEvent
+        Nothing -> waitInputEvent kb
+    _ -> waitInputEvent kb
 
 runEffect :: Effect -> IO ()
 runEffect = \case

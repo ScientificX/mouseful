@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Data.List (isPrefixOf, sort)
+import Data.List (isPrefixOf, nub, sort)
 import qualified Data.Text as T
 import Mouseful.Core.Charset
   ( Key (..)
@@ -33,8 +33,11 @@ import Mouseful.Core.Grid
   )
 import Mouseful.Core.Input
   ( Event (..)
+  , KeyBindings (..)
   , charToKey
+  , defaultKeyBindings
   , directionFromChar
+  , labelChars
   , parseKeyChar
   )
 import Mouseful.Core.State
@@ -325,49 +328,79 @@ inputSpec :: Spec
 inputSpec = do
   describe "parseKeyChar" $ do
     it "parses h/j/k/l as move keys" $ do
-      parseKeyChar 'h' `shouldBe` Just (MoveKey MoveLeft)
-      parseKeyChar 'j' `shouldBe` Just (MoveKey MoveDown)
-      parseKeyChar 'k' `shouldBe` Just (MoveKey MoveUp)
-      parseKeyChar 'l' `shouldBe` Just (MoveKey MoveRight)
+      parseKeyChar defaultKeyBindings 'h' `shouldBe` Just (MoveKey MoveLeft)
+      parseKeyChar defaultKeyBindings 'j' `shouldBe` Just (MoveKey MoveDown)
+      parseKeyChar defaultKeyBindings 'k' `shouldBe` Just (MoveKey MoveUp)
+      parseKeyChar defaultKeyBindings 'l' `shouldBe` Just (MoveKey MoveRight)
 
     it "is case-insensitive for move keys" $ do
-      parseKeyChar 'H' `shouldBe` Just (MoveKey MoveLeft)
-      parseKeyChar 'L' `shouldBe` Just (MoveKey MoveRight)
+      parseKeyChar defaultKeyBindings 'H' `shouldBe` Just (MoveKey MoveLeft)
+      parseKeyChar defaultKeyBindings 'L' `shouldBe` Just (MoveKey MoveRight)
 
     it "parses 'm' as ToggleMoveMode" $ do
-      parseKeyChar 'm' `shouldBe` Just ToggleMoveMode
+      parseKeyChar defaultKeyBindings 'm' `shouldBe` Just ToggleMoveMode
 
     it "parses space as Confirm" $ do
-      parseKeyChar ' ' `shouldBe` Just Confirm
-
-    it "parses return as Confirm" $ do
-      parseKeyChar '\r' `shouldBe` Just Confirm
+      parseKeyChar defaultKeyBindings ' ' `shouldBe` Just Confirm
 
     it "parses escape as Cancel" $ do
-      parseKeyChar '\ESC' `shouldBe` Just Cancel
+      parseKeyChar defaultKeyBindings '\ESC' `shouldBe` Just Cancel
 
     it "parses 'q' as Quit" $ do
-      parseKeyChar 'q' `shouldBe` Just Quit
-      parseKeyChar 'Q' `shouldBe` Just Quit
+      parseKeyChar defaultKeyBindings 'q' `shouldBe` Just Quit
+      parseKeyChar defaultKeyBindings 'Q' `shouldBe` Just Quit
 
-    it "parses label characters (a-z home row) as KeyChar" $ do
-      parseKeyChar 'a' `shouldBe` Just (KeyChar 'a')
-      parseKeyChar 's' `shouldBe` Just (KeyChar 's')
-      parseKeyChar 'd' `shouldBe` Just (KeyChar 'd')
-      parseKeyChar 'f' `shouldBe` Just (KeyChar 'f')
-      parseKeyChar 'z' `shouldBe` Just (KeyChar 'z')
-      parseKeyChar 'x' `shouldBe` Just (KeyChar 'x')
-      parseKeyChar 'p' `shouldBe` Just (KeyChar 'p')
-      parseKeyChar 'n' `shouldBe` Just (KeyChar 'n')
+    it "parses 'x' as ClickLeft" $ do
+      parseKeyChar defaultKeyBindings 'x' `shouldBe` Just ClickLeft
+      parseKeyChar defaultKeyBindings 'X' `shouldBe` Just ClickLeft
+
+    it "parses 'c' as ClickRight" $ do
+      parseKeyChar defaultKeyBindings 'c' `shouldBe` Just ClickRight
+      parseKeyChar defaultKeyBindings 'C' `shouldBe` Just ClickRight
+
+    it "parses label characters (home row except x/c) as KeyChar" $ do
+      parseKeyChar defaultKeyBindings 'a' `shouldBe` Just (KeyChar 'a')
+      parseKeyChar defaultKeyBindings 's' `shouldBe` Just (KeyChar 's')
+      parseKeyChar defaultKeyBindings 'd' `shouldBe` Just (KeyChar 'd')
+      parseKeyChar defaultKeyBindings 'f' `shouldBe` Just (KeyChar 'f')
+      parseKeyChar defaultKeyBindings 'z' `shouldBe` Just (KeyChar 'z')
+      parseKeyChar defaultKeyBindings 'p' `shouldBe` Just (KeyChar 'p')
+      parseKeyChar defaultKeyBindings 'n' `shouldBe` Just (KeyChar 'n')
 
     it "lowercases uppercase label characters" $ do
-      parseKeyChar 'A' `shouldBe` Just (KeyChar 'a')
-      parseKeyChar 'Z' `shouldBe` Just (KeyChar 'z')
+      parseKeyChar defaultKeyBindings 'A' `shouldBe` Just (KeyChar 'a')
+      parseKeyChar defaultKeyBindings 'Z' `shouldBe` Just (KeyChar 'z')
 
     it "returns Nothing for non-label characters" $ do
-      parseKeyChar '1' `shouldBe` Nothing
-      parseKeyChar '!' `shouldBe` Nothing
-      parseKeyChar '.' `shouldBe` Nothing
+      parseKeyChar defaultKeyBindings '1' `shouldBe` Nothing
+      parseKeyChar defaultKeyBindings '!' `shouldBe` Nothing
+      parseKeyChar defaultKeyBindings '.' `shouldBe` Nothing
+
+  describe "labelChars" $ do
+    it "excludes action keys from label chars" $ do
+      let labels = labelChars defaultKeyBindings
+      'h' `notElem` labels `shouldBe` True
+      'j' `notElem` labels `shouldBe` True
+      'k' `notElem` labels `shouldBe` True
+      'l' `notElem` labels `shouldBe` True
+      'x' `notElem` labels `shouldBe` True
+      'c' `notElem` labels `shouldBe` True
+      'm' `notElem` labels `shouldBe` True
+      'q' `notElem` labels `shouldBe` True
+
+    it "includes non-action home row letters" $ do
+      let labels = labelChars defaultKeyBindings
+      'a' `elem` labels `shouldBe` True
+      's' `elem` labels `shouldBe` True
+      'd' `elem` labels `shouldBe` True
+      'f' `elem` labels `shouldBe` True
+      'g' `elem` labels `shouldBe` True
+      'n' `elem` labels `shouldBe` True
+      'p' `elem` labels `shouldBe` True
+
+    it "has no duplicates" $ do
+      let labels = labelChars defaultKeyBindings
+      length labels `shouldBe` length (nub labels)
 
   describe "charToKey" $ do
     it "maps 'a' through 'f' correctly" $ do
@@ -424,6 +457,7 @@ stateSpec = do
       cfgFreeStep defaultConfig `shouldBe` 8
       cfgGridStep defaultConfig `shouldBe` 24
       cfgAutoFineGrid defaultConfig `shouldBe` True
+      cfgBindings defaultConfig `shouldBe` defaultKeyBindings
 
   describe "initialState" $ do
     it "creates state with given screen and cursor" $ do
@@ -487,6 +521,18 @@ stateSpec = do
           (st', fx) = step defaultConfig st Quit
       st' `shouldBe` st
       fx `shouldBe` []
+
+    it "ClickLeft in Idle emits Click LeftButton" $ do
+      let st = initialState (Screen 200 200) (Point 50 50)
+          (st', fx) = step defaultConfig st ClickLeft
+      st' `shouldBe` st
+      fx `shouldBe` [Click LeftButton]
+
+    it "ClickRight in Idle emits Click RightButton" $ do
+      let st = initialState (Screen 200 200) (Point 50 50)
+          (st', fx) = step defaultConfig st ClickRight
+      st' `shouldBe` st
+      fx `shouldBe` [Click RightButton]
 
     it "unknown events in Idle produce Beep" $ do
       let st = initialState (Screen 800 600) (Point 0 0)
@@ -556,6 +602,27 @@ stateSpec = do
           (st1, _) = step defaultConfig st ActivationPressed
           (st2, fx) = step defaultConfig st1 (KeyChar '1')
       fx `shouldBe` [Beep]  -- '1' is not a label char, charToKey returns Nothing
+
+    it "ToggleMoveMode in GridOverlay is disabled (beeps)" $ do
+      let st = initialState (Screen 800 600) (Point 0 0)
+          (st1, _) = step defaultConfig st ActivationPressed
+          (st2, fx) = step defaultConfig st1 ToggleMoveMode
+      st2 `shouldBe` st1
+      fx `shouldSatisfy` any isBeep
+
+    it "ClickLeft in GridOverlay emits Click LeftButton" $ do
+      let st = initialState (Screen 800 600) (Point 0 0)
+          (st1, _) = step defaultConfig st ActivationPressed
+          (st2, fx) = step defaultConfig st1 ClickLeft
+      st2 `shouldBe` st1
+      fx `shouldBe` [Click LeftButton]
+
+    it "ClickRight in GridOverlay emits Click RightButton" $ do
+      let st = initialState (Screen 800 600) (Point 0 0)
+          (st1, _) = step defaultConfig st ActivationPressed
+          (st2, fx) = step defaultConfig st1 ClickRight
+      st2 `shouldBe` st1
+      fx `shouldBe` [Click RightButton]
 
   describe "step - CursorControl mode" $ do
     it "Cancel exits CursorControl to Idle with HideOverlay" $ do

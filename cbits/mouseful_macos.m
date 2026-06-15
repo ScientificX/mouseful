@@ -8,6 +8,8 @@
 
 /* Cmd+7 activation combo — keycode 26 is the '7' key, checked with Command modifier. */
 static const CGKeyCode kActivationKeyCode = 26;
+/* Cmd+8 free-range combo — keycode 28 is the '8' key, checked with Command modifier. */
+static const CGKeyCode kFreeRangeKeyCode = 28;
 
 typedef struct {
     MLEventType type;
@@ -168,20 +170,22 @@ static CGEventRef event_tap_callback(CGEventTapProxy proxy,
 
     CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
 
-    if (!g_overlayVisible) {
-        if (keycode == kActivationKeyCode &&
-            (CGEventGetFlags(event) & kCGEventFlagMaskCommand)) {
-            enqueue_event(ML_EVT_ACTIVATION, 0);
-            return NULL;
-        }
-        char ch = keycode_to_char(keycode);
-        if (ch == 'q') {
-            enqueue_event(ML_EVT_KEY, 'q');
-            return NULL;
-        }
-        return event;
+    /* Check for Cmd+7 (grid overlay activation) and Cmd+8 (free-range mode). */
+    CGEventFlags flags = CGEventGetFlags(event);
+    BOOL cmdHeld = (flags & kCGEventFlagMaskCommand) != 0;
+
+    if (cmdHeld && keycode == kActivationKeyCode) {
+        enqueue_event(ML_EVT_ACTIVATION, 0);
+        return NULL;
+    }
+    if (cmdHeld && keycode == kFreeRangeKeyCode) {
+        enqueue_event(ML_EVT_FREE_RANGE, 0);
+        return NULL;
     }
 
+    /* Capture all recognized keys so the state machine can process them.
+       This enables h/j/k/l movement, m for toggle, x/c for clicks,
+       space/enter for confirm, esc for cancel, and q for quit. */
     char ch = keycode_to_char(keycode);
     if (ch != 0) {
         enqueue_event(ML_EVT_KEY, ch);

@@ -14,7 +14,7 @@ import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Mouseful.Core.Commands (Effect (..))
 import Mouseful.Core.Geometry (Point, Screen)
 import Mouseful.Core.Grid (LabeledCell)
-import Mouseful.Core.Input (Event)
+import Mouseful.Core.Input (Event, KeyBindings)
 
 class Monad m => Platform m where
   getScreen :: m Screen
@@ -29,6 +29,7 @@ data PlatformEnv = PlatformEnv
   , envNextEvent :: IO Event
   , envGetScreen :: IO Screen
   , envGetCursor :: IO Point
+  , envBindings :: !KeyBindings
   }
 
 runPlatform :: PlatformEnv -> PlatformM a -> IO a
